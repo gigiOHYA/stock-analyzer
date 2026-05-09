@@ -4,7 +4,7 @@ import type { HistoricalPrice, DividendInfo } from '../types'
 const api = axios.create({ timeout: 12000 })
 
 async function fetchChart(symbol: string, range = '6mo') {
-  const res = await api.get(`/yahoo/v8/finance/chart/${encodeURIComponent(symbol)}`, {
+  const res = await api.get(`/api/yahoo/v8/finance/chart/${encodeURIComponent(symbol)}`, {
     params: { interval: '1d', range, events: 'div,split' },
   })
   const result = res.data?.chart?.result?.[0]

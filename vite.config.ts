@@ -6,16 +6,10 @@ export default defineConfig({
   base: '/stock-analyzer/',
   server: {
     proxy: {
-      '/yahoo': {
+      '/api/yahoo': {
         target: 'https://query1.finance.yahoo.com',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/yahoo/, ''),
-        headers: { 'User-Agent': 'Mozilla/5.0' },
-      },
-      '/yahoo2': {
-        target: 'https://query2.finance.yahoo.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/yahoo2/, ''),
+        rewrite: (path) => path.replace(/^\/api\/yahoo/, ''),
         headers: { 'User-Agent': 'Mozilla/5.0' },
       },
     },
