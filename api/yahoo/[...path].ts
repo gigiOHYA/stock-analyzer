@@ -1,5 +1,18 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
+const HOSTS = [
+  'https://query1.finance.yahoo.com',
+  'https://query2.finance.yahoo.com',
+]
+
+const HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Accept': 'application/json, text/plain, */*',
+  'Accept-Language': 'en-US,en;q=0.9',
+  'Origin': 'https://finance.yahoo.com',
+  'Referer': 'https://finance.yahoo.com/',
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const pathParts = req.query.path as string[]
   const pathStr = Array.isArray(pathParts) ? pathParts.join('/') : pathParts
@@ -11,12 +24,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     )
   ).toString()
 
-  const url = `https://query1.finance.yahoo.com/${pathStr}${queryString ? '?' + queryString : ''}`
+  const suffix = `/${pathStr}${queryString ? '?' + queryString : ''}`
 
-  const response = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0' },
-  })
+  for (const host of HOSTS) {
+    try {
+      const response = await fetch(`${host}${suffix}`, { headers: HEADERS })
+      if (response.ok) {
+        const data = await response.json()
+        return res.status(200).json(data)
+      }
+    } catch {
+      // try next host
+    }
+  }
 
-  const data = await response.json()
-  res.status(response.status).json(data)
+  res.status(502).json({ error: 'Failed to fetch from Yahoo Finance' })
 }
