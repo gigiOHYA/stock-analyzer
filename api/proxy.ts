@@ -8,15 +8,18 @@ const HEADERS = {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const pathStr = (req.query.path as string[]).join('/')
-  const { path: _, ...params } = req.query
+  const { path, ...rest } = req.query
+  if (!path || typeof path !== 'string') {
+    return res.status(400).json({ error: 'Missing path param' })
+  }
+
   const qs = new URLSearchParams(
-    Object.fromEntries(Object.entries(params).map(([k, v]) => [k, Array.isArray(v) ? v[0] : (v ?? '')]))
+    Object.fromEntries(Object.entries(rest).map(([k, v]) => [k, Array.isArray(v) ? v[0] : (v ?? '')]))
   ).toString()
 
   for (const host of ['https://query1.finance.yahoo.com', 'https://query2.finance.yahoo.com']) {
     try {
-      const r = await fetch(`${host}/${pathStr}?${qs}`, { headers: HEADERS })
+      const r = await fetch(`${host}/${path}${qs ? '?' + qs : ''}`, { headers: HEADERS })
       if (r.ok) return res.status(200).json(await r.json())
     } catch { /* try next */ }
   }
