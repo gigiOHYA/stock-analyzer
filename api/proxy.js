@@ -1,5 +1,3 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node'
-
 const HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
   'Accept': '*/*',
@@ -7,11 +5,9 @@ const HEADERS = {
   'Referer': 'https://finance.yahoo.com/',
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req, res) {
   const { path, ...rest } = req.query
-  if (!path || typeof path !== 'string') {
-    return res.status(400).json({ error: 'Missing path param' })
-  }
+  if (!path) return res.status(400).json({ error: 'Missing path' })
 
   const qs = new URLSearchParams(
     Object.fromEntries(Object.entries(rest).map(([k, v]) => [k, Array.isArray(v) ? v[0] : (v ?? '')]))
